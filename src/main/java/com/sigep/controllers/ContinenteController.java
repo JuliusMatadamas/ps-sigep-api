@@ -29,11 +29,7 @@ public class ContinenteController {
 
     @GetMapping("/v1/todos")
     public ResponseEntity<ApiResponseDTO> getAll() {
-        List<ContinenteResponseDTO> continentes = continenteService.getAll();
-        ApiResponseDTO response = ApiResponseDTO.builder()
-                .data(continentes)
-                .build();
-        return ResponseEntity.ok(response);
+        return continenteService.getAll();
     }
 
     @GetMapping("/v1/activos")

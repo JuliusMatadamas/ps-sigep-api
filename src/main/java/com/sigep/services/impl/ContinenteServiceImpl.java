@@ -2,10 +2,14 @@ package com.sigep.services.impl;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.sigep.dto.request.ContinenteRequestDTO;
+import com.sigep.dto.response.ApiResponseDTO;
 import com.sigep.dto.response.ContinenteResponseDTO;
+import com.sigep.dto.response.MetaResponseDTO;
 import com.sigep.entities.ContinenteEntity;
 import com.sigep.mappers.ContinenteMapper;
 import com.sigep.repositories.ContinenteRepository;
@@ -20,11 +24,56 @@ public class ContinenteServiceImpl implements ContinenteService {
     private final ContinenteRepository continenteRepository;
 
     @Override
-    public List<ContinenteResponseDTO> getAll() {
-        List<ContinenteEntity> entities = continenteRepository.getAll();
-        return entities.stream()
+    public ResponseEntity<ApiResponseDTO> getAll() {
+        List<ContinenteEntity> entities = null;
+
+        try {
+            entities = continenteRepository.getAll();
+        } catch (Exception e) {
+            MetaResponseDTO meta = MetaResponseDTO.builder()
+                    .status("FAILURE")
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Error al recuperar la lista de continentes.")
+                    .devMessage(e.getMessage())
+                    .build();
+
+            ApiResponseDTO response = ApiResponseDTO.builder()
+                    .meta(meta)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        if (entities == null || entities.isEmpty()) {
+            MetaResponseDTO meta = MetaResponseDTO.builder()
+                    .status("SUCCESS")
+                    .statusCode(HttpStatus.NO_CONTENT.value())
+                    .message("No se encontraron registros de continentes.")
+                    .build();
+
+            ApiResponseDTO response = ApiResponseDTO.builder()
+                    .meta(meta)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+        }
+
+        List<ContinenteResponseDTO> dtos = entities.stream()
                 .map(ContinenteMapper::toResponseDTO)
                 .toList();
+
+        MetaResponseDTO meta = MetaResponseDTO.builder()
+                .status("SUCCESS")
+                .statusCode(HttpStatus.OK.value())
+                .message("Lista de continentes recuperada con éxito.")
+                .build();
+
+        ApiResponseDTO response = ApiResponseDTO.builder()
+                .meta(meta)
+                .data(dtos)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
