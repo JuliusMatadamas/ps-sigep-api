@@ -19,8 +19,13 @@ import lombok.NoArgsConstructor;
 public class MetaResponseDTO {
 	private String status;
 	private int statusCode;
-	private final String timestamp = LocalDateTime.now().toString();
-	private final String transactionID = UUIDvs7.randomUUID();
+	@Builder.Default
+	private String timestamp = LocalDateTime.now().toString();
+
+	@Builder.Default
+	private String transactionID = org.slf4j.MDC.get("tracingId") != null 
+			? org.slf4j.MDC.get("tracingId") 
+			: UUIDvs7.randomUUID();
 	private String devMessage;
     private String message;
     private Object errorDetails;
