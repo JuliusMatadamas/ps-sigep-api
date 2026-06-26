@@ -24,6 +24,8 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(authorize -> authorize
+                // Allow all endpoints starting with /continentes/v1/ GET requests
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/continentes/v1/**").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception
