@@ -105,13 +105,52 @@ public class ContinenteServiceImpl implements ContinenteService {
     }
 
     @Override
-    public ContinenteResponseDTO create(ContinenteRequestDTO requestDTO) {
-        int rowsAffected = continenteRepository.create(requestDTO.getNombre());
-        if (rowsAffected > 0) {
-            ContinenteEntity entity = continenteRepository.findByNameCustom(requestDTO.getNombre().toLowerCase().trim());
-            return ContinenteMapper.toResponseDTO(entity);
+    public ResponseEntity<ApiResponseDTO> create(ContinenteRequestDTO requestDTO) {
+        int rowsAffected = 0;
+
+        try {
+            rowsAffected = continenteRepository.create(requestDTO.getNombre());
+        } catch (Exception e) {
+            MetaResponseDTO meta = MetaResponseDTO.builder()
+                    .status("FAILURE")
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Error al intentar registrar el continente.")
+                    .devMessage(e.getMessage())
+                    .build();
+
+            ApiResponseDTO response = ApiResponseDTO.builder()
+                    .meta(meta)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return null;
+
+        if (rowsAffected > 0) {
+            MetaResponseDTO meta = MetaResponseDTO.builder()
+                    .status("BAD REQUEST")
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("No se pudo registrar el continente.")
+                    .build();
+
+            ApiResponseDTO response = ApiResponseDTO.builder()
+                    .meta(meta)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+        }
+
+        MetaResponseDTO meta = MetaResponseDTO.builder()
+                .status("SUCCESS")
+                .statusCode(HttpStatus.OK.value())
+                .message("Continente registrado con éxito.")
+                .build();
+
+        ApiResponseDTO response = ApiResponseDTO.builder()
+                .meta(meta)
+                .data(requestDTO)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

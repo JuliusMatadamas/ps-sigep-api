@@ -14,7 +14,7 @@ public interface ContinenteService {
     ContinenteResponseDTO findById(Long id);
     ContinenteResponseDTO findByName(String nombre);
     List<ContinenteResponseDTO> findByPartialName(String nombre);
-    ContinenteResponseDTO create(ContinenteRequestDTO requestDTO);
+    ResponseEntity<ApiResponseDTO> create(ContinenteRequestDTO requestDTO);
     ContinenteResponseDTO update(Long id, ContinenteRequestDTO requestDTO);
     boolean softDelete(Long id);
 }

@@ -70,11 +70,7 @@ public class ContinenteController {
 
     @PostMapping("/v1/crear")
     public ResponseEntity<ApiResponseDTO> create(@RequestBody ContinenteRequestDTO requestDTO) {
-        ContinenteResponseDTO continente = continenteService.create(requestDTO);
-        ApiResponseDTO response = ApiResponseDTO.builder()
-                .data(continente)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return continenteService.create(requestDTO);
     }
 
     @PutMapping("/v1/actualizar/{id}")
