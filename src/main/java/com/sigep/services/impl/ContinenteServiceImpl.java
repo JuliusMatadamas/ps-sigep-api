@@ -16,6 +16,7 @@ import com.sigep.mappers.ContinenteMapper;
 import com.sigep.repositories.ContinenteRepository;
 import com.sigep.services.ContinenteService;
 import com.sigep.utils.LogUtil;
+import com.sigep.utils.ValidationUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +34,7 @@ public class ContinenteServiceImpl implements ContinenteService {
             entities = continenteRepository.getAll();
         } catch (Exception e) {
             MetaResponseDTO meta = MetaResponseDTO.builder()
-                    .status("FAILURE")
+                    .status(AppConstants.FAILURE)
                     .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Error al recuperar la lista de continentes.")
                     .devMessage(e.getMessage())
@@ -110,6 +111,58 @@ public class ContinenteServiceImpl implements ContinenteService {
     public ResponseEntity<ApiResponseDTO> create(ContinenteRequestDTO requestDTO) {
         LogUtil.info("Iniciando registro de continente: " + requestDTO.getNombre());
 
+        if (!ValidationUtil.isValidString(requestDTO.getNombre())) {
+            LogUtil.warn("Nombre de continente inválido");
+            MetaResponseDTO meta = MetaResponseDTO.builder()
+                    .status(AppConstants.BAD_REQUEST)
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("Nombre de continente inválido.")
+                    .build();
+
+            ApiResponseDTO response = ApiResponseDTO.builder()
+                    .meta(meta)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        ContinenteEntity existing;
+
+        try {
+            existing = continenteRepository.findByNameCustom(
+                requestDTO.getNombre().toLowerCase().trim()
+            );
+        } catch (Exception e) {
+            LogUtil.error("Excepción al validar existencia de continente", e);
+            MetaResponseDTO meta = MetaResponseDTO.builder()
+                    .status(AppConstants.FAILURE)
+                    .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Error al intentar validar existencia del continente.")
+                    .devMessage(e.getMessage())
+                    .build();
+
+            ApiResponseDTO response = ApiResponseDTO.builder()
+                    .meta(meta)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        if (existing != null) {
+            LogUtil.warn("El continente '" + requestDTO.getNombre() + "' ya existe");
+            MetaResponseDTO meta = MetaResponseDTO.builder()
+                    .status(AppConstants.BAD_REQUEST)
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("El continente '" + requestDTO.getNombre() + "' ya esta registrado.")
+                    .build();
+
+            ApiResponseDTO response = ApiResponseDTO.builder()
+                    .meta(meta)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
         int rowsAffected;
 
         try {
@@ -118,7 +171,7 @@ public class ContinenteServiceImpl implements ContinenteService {
         } catch (Exception e) {
             LogUtil.error("Excepción al registrar continente", e);
             MetaResponseDTO meta = MetaResponseDTO.builder()
-                    .status("FAILURE")
+                    .status(AppConstants.FAILURE)
                     .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Error al intentar registrar el continente.")
                     .devMessage(e.getMessage())
@@ -134,7 +187,7 @@ public class ContinenteServiceImpl implements ContinenteService {
         if (rowsAffected == 0) {
             LogUtil.warn("No se pudo registrar el continente");
             MetaResponseDTO meta = MetaResponseDTO.builder()
-                    .status("BAD REQUEST")
+                    .status(AppConstants.BAD_REQUEST)
                     .statusCode(HttpStatus.BAD_REQUEST.value())
                     .message("No se pudo registrar el continente.")
                     .build();
