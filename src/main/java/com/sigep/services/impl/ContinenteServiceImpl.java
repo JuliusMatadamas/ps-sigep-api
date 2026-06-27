@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.sigep.constants.AppConstants;
 import com.sigep.dto.request.ContinenteRequestDTO;
 import com.sigep.dto.response.ApiResponseDTO;
 import com.sigep.dto.response.ContinenteResponseDTO;
@@ -14,6 +15,7 @@ import com.sigep.entities.ContinenteEntity;
 import com.sigep.mappers.ContinenteMapper;
 import com.sigep.repositories.ContinenteRepository;
 import com.sigep.services.ContinenteService;
+import com.sigep.utils.LogUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +27,7 @@ public class ContinenteServiceImpl implements ContinenteService {
 
     @Override
     public ResponseEntity<ApiResponseDTO> getAll() {
-        List<ContinenteEntity> entities = null;
+        List<ContinenteEntity> entities;
 
         try {
             entities = continenteRepository.getAll();
@@ -46,7 +48,7 @@ public class ContinenteServiceImpl implements ContinenteService {
 
         if (entities == null || entities.isEmpty()) {
             MetaResponseDTO meta = MetaResponseDTO.builder()
-                    .status("SUCCESS")
+                    .status(AppConstants.SUCCESS)
                     .statusCode(HttpStatus.NO_CONTENT.value())
                     .message("No se encontraron registros de continentes.")
                     .build();
@@ -63,7 +65,7 @@ public class ContinenteServiceImpl implements ContinenteService {
                 .toList();
 
         MetaResponseDTO meta = MetaResponseDTO.builder()
-                .status("SUCCESS")
+                .status(AppConstants.SUCCESS)
                 .statusCode(HttpStatus.OK.value())
                 .message("Lista de continentes recuperada con éxito.")
                 .build();
@@ -106,11 +108,15 @@ public class ContinenteServiceImpl implements ContinenteService {
 
     @Override
     public ResponseEntity<ApiResponseDTO> create(ContinenteRequestDTO requestDTO) {
-        int rowsAffected = 0;
+        LogUtil.info("Iniciando registro de continente: " + requestDTO.getNombre());
+
+        int rowsAffected;
 
         try {
             rowsAffected = continenteRepository.create(requestDTO.getNombre());
+            LogUtil.var("rowsAffected", rowsAffected);
         } catch (Exception e) {
+            LogUtil.error("Excepción al registrar continente", e);
             MetaResponseDTO meta = MetaResponseDTO.builder()
                     .status("FAILURE")
                     .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -125,7 +131,8 @@ public class ContinenteServiceImpl implements ContinenteService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
-        if (rowsAffected > 0) {
+        if (rowsAffected == 0) {
+            LogUtil.warn("No se pudo registrar el continente");
             MetaResponseDTO meta = MetaResponseDTO.builder()
                     .status("BAD REQUEST")
                     .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -139,8 +146,10 @@ public class ContinenteServiceImpl implements ContinenteService {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
         }
 
+        LogUtil.info("Continente registrado con éxito");
+
         MetaResponseDTO meta = MetaResponseDTO.builder()
-                .status("SUCCESS")
+                .status(AppConstants.SUCCESS)
                 .statusCode(HttpStatus.OK.value())
                 .message("Continente registrado con éxito.")
                 .build();
