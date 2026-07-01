@@ -4,25 +4,24 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sigep.dto.response.StructuredLog;
 import com.sigep.utils.UUIDvs7;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -60,16 +59,16 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
     ) throws ServletException, IOException {
 
         long startTime = System.currentTimeMillis();
         String tracingId = UUIDvs7.randomUUID();
         String sourceIP = getClientIp(request);
 
-        // Registrar en el MDC para que esté disponible en todo el hilo de ejecución
+        // Registrar en el MDC para propagar el contexto durante el hilo de ejecucion
         MDC.put(TRACING_ID_KEY, tracingId);
         MDC.put(SOURCE_IP_KEY, sourceIP);
 
@@ -106,7 +105,7 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
                     .status(response.getStatus() >= 400 ? "ERROR" : "SUCCESS")
                     .message(response.getStatus() >= 400 ? "HTTP Error Status: " + response.getStatus() : "OK")
                     .logOrigin("INTERNAL")
-                    .timestamp(LocalDateTime.now().format(DATE_FORMATTER))
+                    .timestamp(LocalDateTime.now(ZoneOffset.UTC).format(DATE_FORMATTER))
                     .tracingId(tracingId)
                     .hostname(hostname)
                     .eventType("HTTP_TRANSACTION")

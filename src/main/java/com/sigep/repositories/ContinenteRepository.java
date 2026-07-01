@@ -62,8 +62,8 @@ public interface ContinenteRepository extends JpaRepository<ContinenteEntity, Lo
             updated_at
         FROM
             continentes
-        WHERE
-            nombre = :nombre
+        WHERE BINARY
+            nombre = LOWER(TRIM(:nombre))
         """, nativeQuery = true)
     ContinenteEntity findByNameCustom(String nombre);
 
@@ -76,8 +76,8 @@ public interface ContinenteRepository extends JpaRepository<ContinenteEntity, Lo
             updated_at
         FROM
             continentes
-        WHERE
-            nombre LIKE '%:nombre%'
+        WHERE BINARY
+            nombre LIKE CONCAT('%', LOWER(TRIM(:nombre)), '%')
         """, nativeQuery = true)
     List<ContinenteEntity> findByPartialName(String nombre);
 

@@ -4,12 +4,14 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Data
 @Builder
@@ -56,9 +58,9 @@ public class StructuredLog {
 
     public String toJson() {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = JsonMapper.builder().build();
             return mapper.writeValueAsString(this);
-        } catch (Exception e) {
+        } catch (JacksonException e) {
             return "{\"message\":\"Error serializing log to JSON\"}";
         }
     }

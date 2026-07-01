@@ -12,6 +12,13 @@ public final class AppConstants {
 	public static final String FAILURE = "FAILURE";
 	public static final String BAD_REQUEST = "BAD REQUEST";
 
+	public static final String MSG_OBTENIDOS = "Se obtuvieron ";
+	public static final String MSG_RETORNADOS = "Se retornaron ";
+	public static final String MSG_CONTINENTE_NO_ENCONTRADO_ID = "Continente no encontrado con id: ";
+	public static final String MSG_CONTINENTE_NO_ENCONTRADO = "Continente no encontrado.";
+	public static final String MSG_CONTINENTE_YA_REGISTRADO_PREFIX = "El continente '";
+	public static final String LOG_VAR_ROWS_AFFECTED = "rowsAffected";
+
 	private static final List<String> SQL_INJECTION_PATTERNS = List.of(
 		";--", "'--", "/*", "*/", "DROP TABLE", "DELETE FROM",
 		"INSERT INTO", "UPDATE", "EXEC", "UNION", "SELECT"
