@@ -28,6 +28,9 @@ public class AppExceptionsHandler {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private static final String ADDITIONAL_INFO_EXCEPTION_CLASS = "exceptionClass";
+    private static final String LOG_TYPE_TRANSACTION = "TRANSACTION";
+
     private final String hostname;
 
     @Value("${log.application.name:ps-sigep-api}")
@@ -103,11 +106,11 @@ public class AppExceptionsHandler {
             HttpServletRequest request
     ) {
         Map<String, Object> additionalInfo = new HashMap<>();
-        additionalInfo.put("exceptionClass", ex.getClass().getName());
+        additionalInfo.put(ADDITIONAL_INFO_EXCEPTION_CLASS, ex.getClass().getName());
 
         StructuredLog logData = buildStructuredLog(
                 "INFO",
-                "TRANSACTION",
+                LOG_TYPE_TRANSACTION,
                 AppConstants.SUCCESS,
                 ex.getMessage(),
                 "NO_CONTENT_RESULT",
@@ -141,12 +144,12 @@ public class AppExceptionsHandler {
         );
 
         Map<String, Object> additionalInfo = new HashMap<>();
-        additionalInfo.put("exceptionClass", ex.getClass().getName());
+        additionalInfo.put(ADDITIONAL_INFO_EXCEPTION_CLASS, ex.getClass().getName());
         additionalInfo.put("validationErrors", errors);
 
         StructuredLog logData = buildStructuredLog(
                 "WARN",
-                "TRANSACTION",
+                LOG_TYPE_TRANSACTION,
                 AppConstants.BAD_REQUEST,
                 "Validation failed for request parameters",
                 "VALIDATION_ERROR",
@@ -179,7 +182,7 @@ public class AppExceptionsHandler {
         String failureLocation = getFailureLocation(ex);
 
         Map<String, Object> additionalInfo = new HashMap<>();
-        additionalInfo.put("exceptionClass", ex.getClass().getName());
+        additionalInfo.put(ADDITIONAL_INFO_EXCEPTION_CLASS, ex.getClass().getName());
         additionalInfo.put("failureLocation", failureLocation);
 
         StructuredLog logData = buildStructuredLog(
@@ -218,11 +221,11 @@ public class AppExceptionsHandler {
             String eventType
     ) {
         Map<String, Object> additionalInfo = new HashMap<>();
-        additionalInfo.put("exceptionClass", ex.getClass().getName());
+        additionalInfo.put(ADDITIONAL_INFO_EXCEPTION_CLASS, ex.getClass().getName());
 
         StructuredLog logData = buildStructuredLog(
                 logLevel,
-                "TRANSACTION",
+                LOG_TYPE_TRANSACTION,
                 metaStatus,
                 ex.getMessage(),
                 eventType,
